@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, Zap } from "lucide-react";
@@ -9,13 +9,36 @@ import { products, DISCLAIMER } from "@/data/products";
 const companyLinks = [
   { label: "The Science", href: "/science" },
   { label: "Third-Party Testing", href: "/testing" },
+  { label: "Orders", href: "/orders" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];
 
+const NEWSLETTER_KEY = "synaptiq-newsletter";
+
 export function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+
+  // Remember a prior signup across visits (stored locally in this browser).
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(NEWSLETTER_KEY)) setSubscribed(true);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
+  }, []);
+
+  const subscribe = () => {
+    const value = email.trim();
+    if (!value) return;
+    try {
+      localStorage.setItem(NEWSLETTER_KEY, value);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
+    setSubscribed(true);
+  };
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-zinc-950">
@@ -95,7 +118,7 @@ export function Footer() {
                 className="mt-3 flex gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (email.trim()) setSubscribed(true);
+                  subscribe();
                 }}
               >
                 <input
@@ -125,8 +148,8 @@ export function Footer() {
 
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/5 pt-6 text-xs text-zinc-600 sm:flex-row">
           <span>
-            © {new Date().getFullYear()} Synaptiq Labs. Demo storefront — not a
-            real store.
+            © {new Date().getFullYear()} Synaptiq Labs. Showcase build — no real
+            payments are processed.
           </span>
           <span className="font-mono tracking-[0.25em]">
             DESIGNED FOR DEEP WORK

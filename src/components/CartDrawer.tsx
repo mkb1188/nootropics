@@ -202,6 +202,13 @@ export function CartDrawer() {
                   >
                     Checkout
                   </Link>
+                  <Link
+                    href="/orders"
+                    onClick={close}
+                    className="mt-3 block text-center text-xs font-semibold text-zinc-500 transition-colors hover:text-violet-300"
+                  >
+                    View past orders
+                  </Link>
                 </div>
               </>
             )}

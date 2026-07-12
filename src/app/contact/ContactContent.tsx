@@ -12,7 +12,8 @@ const channels = [
   {
     icon: Mail,
     label: "Email",
-    value: "support@synaptiq.demo",
+    value: "hello@synaptiq.co",
+    href: "mailto:hello@synaptiq.co",
     note: "Best for order and product questions",
   },
   {
@@ -76,9 +77,18 @@ export function ContactContent() {
                       <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
                         {channel.label}
                       </p>
-                      <p className="font-display text-base font-bold text-white">
-                        {channel.value}
-                      </p>
+                      {channel.href ? (
+                        <a
+                          href={channel.href}
+                          className="font-display text-base font-bold text-white transition-colors hover:text-violet-300"
+                        >
+                          {channel.value}
+                        </a>
+                      ) : (
+                        <p className="font-display text-base font-bold text-white">
+                          {channel.value}
+                        </p>
+                      )}
                       <p className="text-xs text-zinc-500">{channel.note}</p>
                     </div>
                   </div>
@@ -122,8 +132,15 @@ export function ContactContent() {
                       Transmission received.
                     </h2>
                     <p className="mt-2 max-w-xs text-sm text-zinc-400">
-                      A human will reply within 24 hours. (Demo — nothing was
-                      actually sent.)
+                      This is a showcase build, so it isn&apos;t routed to a live
+                      inbox — for anything real, email us directly at{" "}
+                      <a
+                        href="mailto:hello@synaptiq.co"
+                        className="font-semibold text-violet-300 hover:text-violet-200"
+                      >
+                        hello@synaptiq.co
+                      </a>
+                      .
                     </p>
                     <button
                       onClick={() => setSent(false)}

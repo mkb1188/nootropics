@@ -39,11 +39,11 @@ const faqs = [
   },
   {
     q: "What's your shipping and returns policy?",
-    a: "This is a demo storefront, so nothing actually ships. The real-world policy it models: free shipping over $80, and an unconditional 30-day money-back guarantee — even on empty bottles.",
+    a: "Free shipping on orders over $80, flat $6.90 below that, and an unconditional 30-day money-back guarantee — even on empty bottles. Every order you place is saved to your order history.",
   },
   {
     q: "Do you offer subscriptions?",
-    a: "Planned but not wired up in this demo. The design: 15% off, pause or cancel anytime, and batch COAs emailed with every shipment.",
+    a: "On the roadmap: 15% off, pause or cancel anytime, and batch COAs emailed with every shipment. For now, reorder any stack in a couple of clicks from the shop.",
   },
 ];
 

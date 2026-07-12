@@ -15,6 +15,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useCart, cartSubtotal } from "@/store/cart";
+import { useOrders, makeOrderId, type Order } from "@/store/orders";
 import { products } from "@/data/products";
 import { formatPrice } from "@/lib/utils";
 import { FadeIn } from "@/components/FadeIn";
@@ -44,24 +45,16 @@ function Field({
       >
         {label}
       </label>
-      <input id={id} className={inputClass} {...props} />
+      <input id={id} name={id} className={inputClass} {...props} />
     </div>
   );
-}
-
-function makeOrderId() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let id = "";
-  for (let i = 0; i < 6; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return `SYN-${id}`;
 }
 
 type Phase = "form" | "placing" | "done";
 
 export function CheckoutContent() {
   const { lines, clear } = useCart();
+  const addOrder = useOrders((s) => s.addOrder);
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("form");
   const [orderId, setOrderId] = useState("");
@@ -73,15 +66,47 @@ export function CheckoutContent() {
     subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FLAT;
   const total = subtotal + shipping;
 
-  const placeOrder = () => {
+  const placeOrder = (data: FormData) => {
     setPhase("placing");
     const id = makeOrderId();
-    // fake payment processing beat
+
+    // Snapshot the cart into an order the moment it's placed, so history
+    // survives later price/catalog changes and the cart being cleared.
+    const items = lines.flatMap((line) => {
+      const product = products.find((p) => p.id === line.id);
+      return product
+        ? [
+            {
+              id: product.id,
+              name: product.name,
+              code: product.code,
+              accent: product.accent,
+              qty: line.qty,
+              price: product.price,
+            },
+          ]
+        : [];
+    });
+
+    const order: Order = {
+      id,
+      createdAt: Date.now(),
+      items,
+      subtotal,
+      shipping,
+      total,
+      email: String(data.get("email") ?? ""),
+      name: String(data.get("name") ?? ""),
+      city: String(data.get("city") ?? ""),
+    };
+
+    // Brief finalizing beat for feel, then commit the order and empty the cart.
     setTimeout(() => {
+      addOrder(order);
       setOrderId(id);
       setPhase("done");
       clear();
-    }, 1400);
+    }, 900);
   };
 
   // Until the persisted cart rehydrates, render a stable shell
@@ -130,24 +155,24 @@ export function CheckoutContent() {
               <span className="font-mono font-semibold text-white">
                 {orderId}
               </span>{" "}
-              is confirmed. A receipt is on its way to your inbox.
+              is confirmed and saved to your order history.
             </p>
             <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-              // Demo order — nothing was charged or shipped
+              // Showcase store — no real charge or shipment
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <Link
-                href="/shop"
+                href="/orders"
                 className="group inline-flex items-center gap-2 rounded-xl bg-violet-500 px-6 py-3 font-semibold text-white shadow-[0_0_30px_-8px_rgba(139,92,246,0.9)] transition-all hover:scale-[1.03] hover:bg-violet-400"
               >
-                Keep browsing
+                View order history
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
-                href="/"
+                href="/shop"
                 className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3 font-semibold text-zinc-200 backdrop-blur transition-colors hover:border-white/30 hover:text-white"
               >
-                Back home
+                Keep browsing
               </Link>
             </div>
           </motion.div>
@@ -210,14 +235,14 @@ export function CheckoutContent() {
             index="01"
             eyebrow="Checkout"
             title="Lock in your protocol."
-            description="Demo checkout — any values work, nothing is charged, nothing ships."
+            description="Enter your details to place the order. This is a showcase store — no real payment is processed."
           />
         </div>
 
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            placeOrder();
+            placeOrder(new FormData(e.currentTarget));
           }}
           className="mt-10 grid gap-10 lg:grid-cols-[1fr_420px] lg:gap-12"
         >
@@ -307,7 +332,7 @@ export function CheckoutContent() {
                   </div>
                   <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
                     <Lock className="h-3 w-3" />
-                    Demo — not charged
+                    No real charge
                   </span>
                 </div>
                 <div className="mt-5 grid gap-5 sm:grid-cols-2">
@@ -316,6 +341,8 @@ export function CheckoutContent() {
                     label="Card number"
                     required
                     inputMode="numeric"
+                    pattern="[0-9 ]{12,23}"
+                    title="Enter a 12–19 digit card number"
                     placeholder="4242 4242 4242 4242"
                     autoComplete="cc-number"
                     className="sm:col-span-2"
@@ -324,6 +351,8 @@ export function CheckoutContent() {
                     id="expiry"
                     label="Expiry"
                     required
+                    pattern="\s*[0-9]{2}\s*/?\s*[0-9]{2}\s*"
+                    title="MM / YY"
                     placeholder="MM / YY"
                     autoComplete="cc-exp"
                   />
@@ -332,6 +361,8 @@ export function CheckoutContent() {
                     label="CVC"
                     required
                     inputMode="numeric"
+                    pattern="[0-9]{3,4}"
+                    title="3 or 4 digits"
                     placeholder="123"
                     autoComplete="cc-csc"
                   />
@@ -441,7 +472,7 @@ export function CheckoutContent() {
                 </AnimatePresence>
               </motion.button>
               <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-600">
-                30-day guarantee · third-party tested · demo store
+                30-day guarantee · third-party tested · no real payment
               </p>
             </div>
           </FadeIn>

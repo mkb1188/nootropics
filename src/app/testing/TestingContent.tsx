@@ -189,7 +189,7 @@ export function TestingContent() {
             index="02"
             eyebrow="Batch Lookup"
             title="Pull the certificate yourself."
-            description="Enter the batch code printed on the base of your bottle to see its certificate of analysis. (Demo — use one of the sample codes.)"
+            description="Enter the batch code printed on the base of your bottle to pull its certificate of analysis. Try one of the sample codes below."
           />
 
           <FadeIn delay={0.1}>
@@ -252,8 +252,8 @@ export function TestingContent() {
                   BATCH NOT FOUND
                 </p>
                 <p className="mt-1 text-sm text-zinc-400">
-                  No certificate matches that code. This demo recognizes the
-                  sample codes listed above.
+                  No certificate matches that code. Try one of the sample codes
+                  listed above.
                 </p>
               </motion.div>
             )}

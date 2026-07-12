@@ -8,3 +8,13 @@ export function cn(...inputs: ClassValue[]) {
 export function formatPrice(n: number) {
   return `$${n.toFixed(2)}`;
 }
+
+export function formatDate(ts: number) {
+  return new Date(ts).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
